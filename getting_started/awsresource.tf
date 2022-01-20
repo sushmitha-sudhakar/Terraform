@@ -1,8 +1,3 @@
-locals {
-  project_name = "Terraform"
-}
-
-
 resource "aws_instance" "my_server" {
   ami           = "ami-08e4e35cccc6189f4"
   instance_type = var.instance_type
@@ -12,7 +7,7 @@ resource "aws_instance" "my_server" {
   }
 }
 
-module "vpc" {
+/*module "vpc" {
   source = "terraform-aws-modules/vpc/aws"
   providers = {
     aws = aws.eu
@@ -33,4 +28,4 @@ module "vpc" {
     Environment = "dev"
   }
 }
-
+*/
