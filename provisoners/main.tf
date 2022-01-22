@@ -36,14 +36,20 @@ resource "aws_security_group" "sg_myserver" {
     protocol         = "tcp"
     cidr_blocks      = ["0.0.0.0/0"]
     ipv6_cidr_blocks = []
+    prefix_list_ids  = []
+    security_groups  = []
+    self             = false
   },
- {
+  {
     description      = "SSH"
     from_port        = 22
     to_port          = 22
     protocol         = "tcp"
     cidr_blocks      = ["49.207.218.91/32"]
     ipv6_cidr_blocks = []
+    prefix_list_ids  = []
+    security_groups  = []
+    self             = false
   }
   ]
 
@@ -53,6 +59,9 @@ resource "aws_security_group" "sg_myserver" {
     protocol         = "-1"
     cidr_blocks      = ["0.0.0.0/0"]
     ipv6_cidr_blocks = ["::/0"]
+    prefix_list_ids  = []
+    security_groups  = []
+    self             = false
   }
 
 }
@@ -62,11 +71,16 @@ resource "aws_key_pair" "deployer" {
   public_key = "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABgQC52wOTFTveulexXd0xK2ZIXqGfiY7cbTh1mN90znGljTqAy87kiTFUQY/3WvFtJR2D0iOVNjZ2UuHKYlsliUxvxFvvdpFhTNiwJDoF4Fh3N8WtOToHdTY2lln2WoipREzE48UHIAq129Sl9DMKicS1lq+M7JI5fSn572WQPK2Lao1JoFhgRQuj5jR+ZYsBu5Hvf0OAFjp6YMAnEPlTXNNRF6cOquMDTyLKBzhR6hY3lOHrdcrUjPbG9KPaNgZY39g2xl3w65ObAHwc6duqAOSipjV7jGVabs3XrfIft7RLf2JoMMc4MqqT9AuScOj82E1bKTQYA9Z1jvT09HWXIX4+5OwdMQPAtNB9MbteKGZixvIRHGnvZeKhSWPYH4J2+r5hKu9SzXaBD7xmoXXtd3alQfWdbA+VGG/1RhXDDWNQR9zGjqhy5IggLq67mHkVTzHjLc9+gc/W0qQ0hCDM97nN2+P1yltH4/X50I4o2Evcvl9QNqo6zIRr//+W3GMAyps= sushmithaks@LAPTOP-O3BEKKI6"
 }
 
+data "template_file" "user_data" {
+  template = file("./userdata.yaml")
+}
+
 resource "aws_instance" "my_server" {
   ami           = "ami-08e4e35cccc6189f4"
   instance_type = "t2.micro"
   key_name = "${aws_key_pair.deployer.key_name}"
   vpc_security_group_ids = [aws_security_group.sg_myserver.id]
+  user_data = data.template_file.user_data.rendered
 
   tags = {
     Name = "my_server"
