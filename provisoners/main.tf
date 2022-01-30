@@ -1,12 +1,12 @@
 terraform {
-  cloud {
+  /*backend "remote" {
+    hostname = "app.terraform.io"
     organization = "Terraform-cert-sush"
 
     workspaces {
-      name = "provisioners"
+      name = "provisoners-test"
     }
-  }
-
+  }*/
   required_providers {
     aws = {
       source = "hashicorp/aws"
@@ -15,9 +15,9 @@ terraform {
   }
 }
 
-
 provider "aws" {
-   region = "us-east-1"
+  profile = "default"
+  region  = "us-east-1"
 }
 
 data "aws_vpc" "default_vpc" {
@@ -45,7 +45,7 @@ resource "aws_security_group" "sg_myserver" {
     from_port        = 22
     to_port          = 22
     protocol         = "tcp"
-    cidr_blocks      = ["49.207.218.91/32"]
+    cidr_blocks      = ["49.207.220.27/32"]
     ipv6_cidr_blocks = []
     prefix_list_ids  = []
     security_groups  = []
@@ -81,6 +81,22 @@ resource "aws_instance" "my_server" {
   key_name = "${aws_key_pair.deployer.key_name}"
   vpc_security_group_ids = [aws_security_group.sg_myserver.id]
   user_data = data.template_file.user_data.rendered
+ /* provisioner "remote-exec" {
+    inline = [
+      "echo ${self.private_ip} >> /home/ec2-user/private_ips.txt"
+    ]*/
+
+  provisioner "file" {
+    content     = "mars"
+    destination = "/home/ec2-user/barsoon.txt"
+
+    connection {
+    type     = "ssh"
+    user     = "ec2-user"
+    host     = "${self.public_ip}"
+    private_key = "${file("~/.ssh/terraform")}"
+  }
+  }
 
   tags = {
     Name = "my_server"
