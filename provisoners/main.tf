@@ -98,9 +98,19 @@ resource "aws_instance" "my_server" {
   }
   }
 
+
   tags = {
     Name = "my_server"
   }
+}
+
+resource "null_resource" "status" {
+  provisioner "local-exec" {
+    command = "aws ec2 wait instance-status-ok --instance-ids ${aws_instance.my_server.id}"
+  }
+  depends_on = [
+    aws_instance.my_server
+  ]
 }
 
 output "public_ip" {
